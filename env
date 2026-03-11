@@ -1,0 +1,8 @@
+MONGO_URI=mongodb://localhost:27017
+DB_NAME=test
+
+UPLOADS_DIR=D:\Suraj Sharma\projects\drive-sync\images
+PUBLIC_BASE=http://localhost:5200/uploads
+
+MAX_DISTANCE=10
+AUTO_INDEX_HOURS=6

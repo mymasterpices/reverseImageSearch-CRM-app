@@ -1,0 +1,15 @@
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables (contains DB credentials)
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
