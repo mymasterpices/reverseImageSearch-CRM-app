@@ -9,6 +9,7 @@ import imagehash
 from bson import ObjectId
 from PIL import Image
 from pymongo.database import Database
+from rembg import remove
 
 logger    = logging.getLogger(__name__)
 IMAGE_EXT = {".jpg", ".jpeg"}
@@ -21,10 +22,6 @@ def index_one(
     filename:      str,
     subfolder:     str,
 ) -> ObjectId:
-    """
-    Upsert one image hash into MongoDB.
-    Keyed on relative_path — safe to call multiple times.
-    """
     result = db.image_embeddings.update_one(
         {"relative_path": relative_path},
         {"$set": {
@@ -43,18 +40,31 @@ def index_one(
     )["_id"]
 
 
-def bulk_index_folder(uploads_dir: str, db: Database, force: bool = False) -> int:
-    """
-    Recursively walk uploads_dir.
-    Hash every .jpg/.jpeg not already indexed.
-    Returns count of newly indexed images.
-    """
+def remove_bg_and_hash(img_bytes: bytes, session) -> str:
+    """Remove background then compute pHash on white canvas."""
+    # Remove background
+    result = remove(img_bytes, session=session)
+    nobg   = Image.open(io.BytesIO(result)).convert("RGBA")
+
+    # Paste on white canvas
+    canvas = Image.new("RGB", nobg.size, (255, 255, 255))
+    canvas.paste(nobg, mask=nobg.split()[3])
+
+    return str(imagehash.phash(canvas, hash_size=8))
+
+
+def bulk_index_folder(
+    uploads_dir: str,
+    db:          Database,
+    session,                # rembg session
+    force:       bool = False,
+) -> int:
     root = Path(uploads_dir)
     if not root.exists():
         logger.error("❌ UPLOADS_DIR not found: %s", uploads_dir)
         return 0
 
-    # Load already-indexed relative paths to skip them
+    # Load already-indexed paths
     already_indexed = set()
     if not force:
         for doc in db.image_embeddings.find({}, {"relative_path": 1}):
@@ -70,24 +80,20 @@ def bulk_index_folder(uploads_dir: str, db: Database, force: bool = False) -> in
         if img_path.suffix.lower() not in IMAGE_EXT:
             continue
 
-        # relative path e.g. "rings/img001.jpg"
         rel = img_path.relative_to(root).as_posix()
-
         if not force and rel in already_indexed:
             continue
 
         try:
-            raw     = img_path.read_bytes()
-            pil_img = Image.open(io.BytesIO(raw)).convert("RGB")
-            h       = str(imagehash.phash(pil_img, hash_size=8))
-
+            raw = img_path.read_bytes()
+            h   = remove_bg_and_hash(raw, session)
             sub = img_path.parent.relative_to(root).as_posix()
             sub = "" if sub == "." else sub
 
             index_one(db, h, rel, img_path.name, sub)
             count += 1
 
-            if count % 500 == 0:
+            if count % 100 == 0:
                 logger.info("  ✅ Indexed %d images so far...", count)
 
         except Exception as e:

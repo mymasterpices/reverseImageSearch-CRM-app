@@ -9,6 +9,7 @@ __pycache__/
 
 # Environment variables (contains DB credentials)
 .env
+env
 
 # OS files
 .DS_Store
