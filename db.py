@@ -2,23 +2,14 @@
 
 import os
 from pymongo import MongoClient
+from pymongo.database import Database
 
-_client = None
-_db     = None
+_client: MongoClient = None
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME   = os.getenv("DB_NAME",   "test")   # your db name
-
-
-def get_client():
+def get_db() -> Database:
     global _client
     if _client is None:
-        _client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
-    return _client
-
-
-def get_db():
-    global _db
-    if _db is None:
-        _db = get_client()[DB_NAME]
-    return _db
+        uri      = os.getenv("MONGO_URI", "mongodb://localhost:27017")
+        _client  = MongoClient(uri)
+    db_name = os.getenv("DB_NAME", "test")
+    return _client[db_name]

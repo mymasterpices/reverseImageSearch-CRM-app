@@ -1,7 +1,8 @@
 # crmApp/image-service — Setup for localhost
 
 ## Prerequisites
-- Python 3.10 or 3.11  (check: python3 --version)
+
+- Python 3.10 or 3.11 (check: python3 --version)
 - Your MongoDB running locally
 
 ---
@@ -49,14 +50,15 @@ PUBLIC_BASE=http://localhost:5000/images  # Express port + static path
 
 ```bash
 # Make sure venv is active, then:
-uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+uvicorn main:app --host 127.0.0.1 --port 8002 --reload
 ```
 
 You should see:
+
 ```
 INFO  Loading CLIP model…
 INFO  CLIP ready ✓
-INFO  Uvicorn running on http://127.0.0.1:8001
+INFO  Uvicorn running on http://127.0.0.1:8002
 ```
 
 ---
@@ -64,12 +66,17 @@ INFO  Uvicorn running on http://127.0.0.1:8001
 ## 5. Verify it's running
 
 ```bash
-curl http://127.0.0.1:8001/health
+curl http://127.0.0.1:8002/health
 ```
 
 Expected:
+
 ```json
-{ "status": "ok", "uploads_dir": "../backend/uploads", "public_base": "http://localhost:5000/images" }
+{
+  "status": "ok",
+  "uploads_dir": "../backend/uploads",
+  "public_base": "http://localhost:5000/images"
+}
 ```
 
 ---
@@ -77,12 +84,13 @@ Expected:
 ## 6. Index your existing images (run once)
 
 ```bash
-curl -X POST http://127.0.0.1:8001/index/all
+curl -X POST http://127.0.0.1:8002/index/all
 ```
 
 Check progress:
+
 ```bash
-curl http://127.0.0.1:8001/stats
+curl http://127.0.0.1:8002/stats
 # { "total_files": 120, "total_indexed": 80, "pending": 40 }
 ```
 
@@ -117,7 +125,7 @@ Open 3 terminals:
 ```bash
 # Terminal 1 — Python service
 cd crmApp/image-service && source venv/bin/activate
-uvicorn main:app --host 127.0.0.1 --port 8001 --reload
+uvicorn main:app --host 127.0.0.1 --port 8002 --reload
 
 # Terminal 2 — Express backend
 cd crmApp/backend && npm run dev
