@@ -105,7 +105,7 @@ crmApp/
 │   └── routes/
 │       └── imageSearch.routes.js   ← ADD THIS FILE
 ├── frontend/              ← your existing Angular app
-│   └── src/app/features/
+│   └── src/app/core/
 │       └── image-search/  ← ADD THIS FOLDER
 └── image-service/         ← NEW (this folder)
     ├── main.py
