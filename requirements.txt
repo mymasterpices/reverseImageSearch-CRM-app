@@ -1,4 +1,5 @@
-# Versions are minimums (SigLIP 2 needs a recent transformers). Run: pip install -U -r requirements.txt
+# Versions are minimums (SigLIP 2 needs a recent transformers).
+# Install CPU torch FIRST on a GPU-less VPS (see README), then: pip install -U -r requirements.txt
 fastapi>=0.115
 uvicorn[standard]>=0.30
 python-multipart>=0.0.9
@@ -8,3 +9,4 @@ numpy>=1.26
 pymongo[srv]>=4.8
 transformers>=4.49
 torch>=2.5
+torchvision>=0.20
